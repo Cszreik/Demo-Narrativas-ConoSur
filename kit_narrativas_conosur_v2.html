@@ -1,0 +1,1038 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kit de Narrativas · ConoSur 2025</title>
+
+<!-- docx.js para exportar Word directamente en el browser -->
+<script src="https://unpkg.com/docx@9.0.2/build/index.umd.js"></script>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500;600&display=swap');
+
+:root {
+  --teal:       #1D9E75;
+  --teal-dark:  #0F6E56;
+  --teal-mid:   #5DCAA5;
+  --teal-light: #E1F5EE;
+  --bg:         #F7F6F2;
+  --surface:    #FFFFFF;
+  --surface2:   #F0EFEb;
+  --border:     rgba(0,0,0,0.08);
+  --border2:    rgba(0,0,0,0.15);
+  --text:       #1A1A1A;
+  --text2:      #555550;
+  --text3:      #98978F;
+  --r:          10px;
+  --rs:         6px;
+  --xl:         18px;
+  --shadow:     0 1px 8px rgba(0,0,0,0.07);
+  --shadowL:    0 6px 28px rgba(0,0,0,0.11);
+  --trans:      0.16s cubic-bezier(.4,0,.2,1);
+  --sidebar-w:  248px;
+}
+[data-theme="dark"] {
+  --bg:        #111110;
+  --surface:   #1C1C1B;
+  --surface2:  #242422;
+  --border:    rgba(255,255,255,0.08);
+  --border2:   rgba(255,255,255,0.15);
+  --text:      #EDECE8;
+  --text2:     #A09F97;
+  --text3:     #666660;
+  --shadow:    0 1px 8px rgba(0,0,0,0.3);
+  --shadowL:   0 6px 28px rgba(0,0,0,0.4);
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:15px;line-height:1.6;transition:background var(--trans),color var(--trans)}
+
+/* ── LAYOUT ── */
+.shell{display:flex;min-height:100vh}
+.sidebar{width:var(--sidebar-w);min-height:100vh;background:#111110;padding:24px 16px;display:flex;flex-direction:column;position:fixed;left:0;top:0;bottom:0;z-index:100;overflow-y:auto}
+.main{margin-left:var(--sidebar-w);flex:1;padding:36px 44px 60px;max-width:calc(100vw - var(--sidebar-w))}
+
+/* ── SIDEBAR ── */
+.brand{display:flex;align-items:center;gap:10px;margin-bottom:28px;padding-bottom:20px;border-bottom:1px solid rgba(255,255,255,0.08)}
+.brand-icon{font-size:26px;line-height:1}
+.brand-name{font-family:'Syne',sans-serif;font-size:12.5px;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:0.04em;line-height:1.25}
+.brand-year{font-size:10px;color:rgba(255,255,255,0.35);margin-top:2px}
+
+.nav-label{font-size:9px;text-transform:uppercase;letter-spacing:0.12em;color:rgba(255,255,255,0.28);margin-bottom:8px;padding-left:8px}
+.nav-item{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:var(--rs);cursor:pointer;color:rgba(255,255,255,0.5);font-size:12.5px;font-weight:400;transition:var(--trans);margin-bottom:2px;border:none;background:none;width:100%;text-align:left;font-family:'Inter',sans-serif}
+.nav-item:hover{background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.85)}
+.nav-item.active{background:var(--teal);color:#fff;font-weight:500}
+.nav-item.done{color:var(--teal-mid)}
+.nav-check{margin-left:auto;font-size:10px;display:none}
+.nav-item.done .nav-check{display:block}
+.nav-icon{font-size:13px;width:16px;text-align:center}
+.nav-divider{height:1px;background:rgba(255,255,255,0.07);margin:14px 0}
+
+.autosave-indicator{font-size:10px;color:rgba(255,255,255,0.28);padding:0 10px;margin-bottom:8px;display:flex;align-items:center;gap:5px;transition:color 0.3s}
+.autosave-indicator.saved{color:var(--teal-mid)}
+.autosave-dot{width:5px;height:5px;border-radius:50%;background:currentColor}
+
+.sidebar-radar{margin-top:auto;padding:12px;background:rgba(255,255,255,0.04);border-radius:var(--rs);border:1px solid rgba(255,255,255,0.07)}
+.radar-lbl{font-size:9px;text-transform:uppercase;letter-spacing:0.1em;color:rgba(255,255,255,0.3);margin-bottom:6px}
+.radar-bar{height:4px;background:rgba(255,255,255,0.08);border-radius:2px;overflow:hidden;margin-bottom:6px}
+.radar-fill{height:100%;background:var(--teal);border-radius:2px;transition:width 0.5s ease;width:0%}
+.radar-txt{font-size:11px;color:rgba(255,255,255,0.45)}
+
+/* ── TOP BAR ── */
+.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:32px}
+.page-title{font-family:'Syne',sans-serif;font-size:26px;font-weight:700;color:var(--text);line-height:1.2;margin-bottom:4px}
+.page-sub{font-size:13px;color:var(--text3)}
+.topbar-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.step-pill{background:var(--teal);color:#fff;font-size:11px;font-weight:600;padding:5px 12px;border-radius:20px;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap}
+.icon-btn{background:var(--surface);border:1px solid var(--border2);border-radius:var(--rs);width:34px;height:34px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;transition:var(--trans);color:var(--text2)}
+.icon-btn:hover{background:var(--surface2);color:var(--text)}
+
+/* ── PROGRESS ── */
+.progress{display:flex;align-items:center;gap:6px;margin-bottom:28px}
+.pdot{width:8px;height:8px;border-radius:50%;background:var(--border2);transition:var(--trans)}
+.pdot.active{background:var(--teal);width:22px;border-radius:4px}
+.pdot.done{background:var(--teal-mid)}
+
+/* ── CARDS ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:22px;box-shadow:var(--shadow);margin-bottom:14px;transition:background var(--trans),border-color var(--trans)}
+.card-title{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;color:var(--text);margin-bottom:14px;display:flex;align-items:center;gap:7px}
+.card-icon{font-size:15px}
+
+/* ── CHECKLIST ── */
+.ci{display:flex;align-items:flex-start;gap:12px;padding:14px 16px;border:1px solid var(--border);border-radius:var(--rs);cursor:pointer;transition:var(--trans);background:var(--surface);margin-bottom:7px}
+.ci:hover{border-color:var(--teal);background:var(--teal-light)}
+[data-theme="dark"] .ci:hover{background:rgba(29,158,117,0.1)}
+.ci.checked{border-color:var(--teal);background:var(--teal-light)}
+[data-theme="dark"] .ci.checked{background:rgba(29,158,117,0.12)}
+.cbox{width:20px;height:20px;border:2px solid var(--border2);border-radius:5px;flex-shrink:0;margin-top:2px;display:flex;align-items:center;justify-content:center;transition:var(--trans);background:var(--surface)}
+.ci.checked .cbox{background:var(--teal);border-color:var(--teal)}
+.ctick{color:#fff;font-size:11px;display:none}
+.ci.checked .ctick{display:block}
+.ci-strong{font-weight:600;font-size:13.5px;color:var(--text);margin-bottom:1px}
+.ci-desc{font-size:12.5px;color:var(--text2);line-height:1.5}
+
+/* ── SCORE ── */
+.score-box{display:flex;align-items:center;gap:18px;padding:18px 22px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);margin-top:14px;box-shadow:var(--shadow)}
+.score-n{font-family:'Syne',sans-serif;font-size:44px;font-weight:800;color:var(--teal);line-height:1;min-width:54px}
+.score-n sub{font-size:20px;color:var(--text3);font-weight:400}
+.score-track{flex:1}
+.score-bar{height:7px;background:var(--surface2);border-radius:4px;overflow:hidden;margin-bottom:9px}
+.score-fill{height:100%;background:linear-gradient(90deg,var(--teal-mid),var(--teal));border-radius:4px;transition:width 0.5s ease;width:0%}
+.score-status{font-size:13px;font-weight:500}
+.s-green{color:var(--teal-dark)}
+.s-amber{color:#7A5800}
+[data-theme="dark"] .s-amber{color:#F5C842}
+.s-gray{color:var(--text3)}
+
+/* ── NAR CARDS ── */
+.nar-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(185px,1fr));gap:10px}
+.nc{border:1.5px solid var(--border);border-radius:var(--r);padding:16px 14px;cursor:pointer;transition:var(--trans);background:var(--surface);position:relative;overflow:hidden}
+.nc::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--nc-color,var(--border2));transition:var(--trans)}
+.nc:hover{border-color:var(--nc-color);transform:translateY(-2px);box-shadow:var(--shadowL)}
+.nc.sel{border-color:var(--nc-color);background:var(--nc-bg)}
+[data-theme="dark"] .nc.sel{background:rgba(255,255,255,0.04)}
+.nc.sel::before{height:4px}
+.nc-check{position:absolute;top:10px;right:10px;width:17px;height:17px;border-radius:50%;background:var(--nc-color);display:flex;align-items:center;justify-content:center;font-size:9px;color:#fff;opacity:0;transition:var(--trans)}
+.nc.sel .nc-check{opacity:1}
+.nc-emoji{font-size:22px;margin-bottom:8px}
+.nc-title{font-family:'Syne',sans-serif;font-size:12.5px;font-weight:700;color:var(--text);margin-bottom:3px;line-height:1.3}
+.nc-sub{font-size:11px;color:var(--text3);line-height:1.35}
+
+/* ── FORM ── */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.fg{margin-bottom:0}
+.fg.full{grid-column:1/-1}
+.flabel{font-size:11px;font-weight:600;color:var(--text2);margin-bottom:5px;display:flex;align-items:center;gap:5px;text-transform:uppercase;letter-spacing:0.05em}
+input[type="text"],textarea,select{width:100%;border:1.5px solid var(--border);border-radius:var(--rs);padding:10px 13px;font-size:13.5px;font-family:'Inter',sans-serif;color:var(--text);background:var(--surface);transition:border-color var(--trans),background var(--trans);line-height:1.5}
+input[type="text"]:focus,textarea:focus,select:focus{outline:none;border-color:var(--teal);box-shadow:0 0 0 3px rgba(29,158,117,0.12)}
+input::placeholder,textarea::placeholder{color:var(--text3)}
+textarea{resize:vertical;min-height:90px}
+.fhint{font-size:11.5px;color:var(--text3);margin-bottom:6px;line-height:1.5}
+
+/* ── TOOLTIP / HINT ── */
+.hint-wrap{display:inline-flex;align-items:center;gap:5px}
+.hint-btn{width:15px;height:15px;border-radius:50%;background:var(--surface2);border:1px solid var(--border2);font-size:9px;display:inline-flex;align-items:center;justify-content:center;color:var(--text3);cursor:help;position:relative;flex-shrink:0;font-style:normal}
+.hint-btn:hover .tip{opacity:1;pointer-events:auto;transform:translateY(0)}
+.tip{position:absolute;bottom:calc(100% + 7px);left:50%;transform:translateX(-50%) translateY(4px);width:270px;background:#1A1A1A;color:#fff;font-size:11.5px;line-height:1.55;padding:11px 13px;border-radius:var(--rs);opacity:0;pointer-events:none;transition:opacity 0.13s,transform 0.13s;z-index:500;font-weight:400;text-transform:none;letter-spacing:0;box-shadow:var(--shadowL)}
+.tip::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:5px solid transparent;border-top-color:#1A1A1A}
+.tip-ex{margin-top:7px;padding:7px 9px;background:rgba(255,255,255,0.09);border-radius:5px;font-style:italic;font-size:11px;line-height:1.5;border-left:2px solid var(--teal-mid)}
+
+/* ── EXAMPLE POPOVER ── */
+.ex-trigger{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;color:var(--teal-dark);cursor:pointer;padding:3px 9px;background:var(--teal-light);border-radius:20px;border:1px solid rgba(29,158,117,0.2);margin-bottom:8px;transition:var(--trans);position:relative;font-weight:500}
+[data-theme="dark"] .ex-trigger{background:rgba(29,158,117,0.15);color:var(--teal-mid)}
+.ex-trigger:hover{background:#c5e8da}
+[data-theme="dark"] .ex-trigger:hover{background:rgba(29,158,117,0.25)}
+.ex-trigger:hover .expop{opacity:1;pointer-events:auto;transform:translateY(0)}
+.expop{position:absolute;top:calc(100% + 8px);left:0;width:330px;background:var(--surface);border:1px solid var(--border2);border-radius:var(--r);padding:14px;box-shadow:var(--shadowL);opacity:0;pointer-events:none;transform:translateY(-4px);transition:opacity 0.14s,transform 0.14s;z-index:400;text-align:left}
+.expop::before{content:'';position:absolute;bottom:100%;left:18px;border:6px solid transparent;border-bottom-color:var(--border2)}
+.expop::after{content:'';position:absolute;bottom:100%;left:19px;border:5px solid transparent;border-bottom-color:var(--surface);margin-bottom:-1px}
+.ep-tag{font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--teal);margin-bottom:7px}
+.ep-title{font-weight:600;font-size:12.5px;color:var(--text);margin-bottom:7px;line-height:1.4}
+.ep-text{font-size:12px;color:var(--text2);line-height:1.6;border-left:2px solid var(--teal-mid);padding-left:9px;font-style:italic}
+.ep-why{font-size:11px;color:var(--teal-dark);margin-top:7px;font-style:normal;font-weight:500}
+[data-theme="dark"] .ep-why{color:var(--teal-mid)}
+
+/* ── WORD COUNT ── */
+.wc{font-size:11px;color:var(--text3);text-align:right;margin-top:4px}
+.wc.warn{color:#B8860B}
+.wc.over{color:#A32D2D;font-weight:600}
+#totalWC{font-size:12px;font-weight:500}
+
+/* ── CHIPS ── */
+.chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:7px}
+.chip{border:1px solid var(--border2);border-radius:20px;padding:5px 12px;font-size:12px;font-weight:500;cursor:pointer;color:var(--text2);background:var(--surface);transition:var(--trans)}
+.chip:hover{border-color:var(--teal);color:var(--teal-dark)}
+.chip.sel{background:var(--teal);border-color:var(--teal);color:#fff}
+
+/* ── BUTTONS ── */
+.btn{display:inline-flex;align-items:center;gap:7px;padding:10px 20px;border-radius:var(--rs);font-size:13.5px;font-weight:600;font-family:'Inter',sans-serif;cursor:pointer;transition:var(--trans);border:none;text-decoration:none;line-height:1}
+.btn-primary{background:var(--teal);color:#fff}
+.btn-primary:hover{background:var(--teal-dark);transform:translateY(-1px);box-shadow:0 4px 16px rgba(29,158,117,0.28)}
+.btn-ghost{background:transparent;color:var(--text2);border:1.5px solid var(--border2)}
+.btn-ghost:hover{border-color:var(--border2);color:var(--text);background:var(--surface2)}
+.btn-word{background:#2B5797;color:#fff}
+.btn-word:hover{background:#1E3F70;transform:translateY(-1px);box-shadow:0 4px 16px rgba(43,87,151,0.28)}
+.btn-row{display:flex;gap:8px;margin-top:24px;align-items:center;flex-wrap:wrap}
+.btn-loading{opacity:0.7;pointer-events:none}
+
+/* ── OUTPUT ── */
+.out-hero{background:#111110;border-radius:var(--r);padding:28px 30px;margin-bottom:14px;color:#fff;position:relative;overflow:hidden}
+.out-hero::before{content:'';position:absolute;top:-50px;right:-50px;width:180px;height:180px;border-radius:50%;background:var(--teal);opacity:0.07}
+.out-nar-pill{display:inline-flex;align-items:center;gap:5px;background:rgba(29,158,117,0.18);border:1px solid rgba(29,158,117,0.3);color:var(--teal-mid);font-size:10.5px;font-weight:600;padding:3px 11px;border-radius:20px;margin-bottom:12px;text-transform:uppercase;letter-spacing:0.05em}
+.out-title{font-family:'Syne',sans-serif;font-size:20px;font-weight:700;color:#fff;line-height:1.3;margin-bottom:8px}
+.out-meta{font-size:11.5px;color:rgba(255,255,255,0.4);display:flex;gap:14px;flex-wrap:wrap}
+.out-sec{background:var(--surface);border:1px solid var(--border);border-radius:var(--rs);padding:16px 18px;margin-bottom:9px}
+.out-sec-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--text3);margin-bottom:7px}
+.out-sec-txt{font-size:13.5px;color:var(--text);line-height:1.7}
+.tag{display:inline-block;background:var(--surface2);color:var(--text2);font-size:11px;font-weight:500;padding:2px 9px;border-radius:20px;margin:2px}
+.tag.g{background:var(--teal-light);color:var(--teal-dark)}
+
+/* ── MATRIX ── */
+.matrix-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-top:18px}
+.matrix-head{padding:13px 18px;background:#111110;color:#fff;font-family:'Syne',sans-serif;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em}
+table.mt{width:100%;border-collapse:collapse;font-size:12.5px}
+table.mt th{background:var(--surface2);padding:9px 13px;text-align:left;font-weight:600;color:var(--text2);border-bottom:1px solid var(--border);font-size:11px;text-transform:uppercase;letter-spacing:0.04em}
+table.mt td{padding:11px 13px;border-bottom:1px solid var(--border);color:var(--text);vertical-align:top;line-height:1.5}
+table.mt tr:last-child td{border-bottom:none}
+
+/* ── COMPLETION BANNER ── */
+.done-banner{background:linear-gradient(135deg,var(--teal-dark),var(--teal));border-radius:var(--r);padding:18px 22px;color:#fff;display:flex;align-items:center;gap:14px;margin-bottom:16px}
+.done-icon{font-size:28px}
+.done-title{font-family:'Syne',sans-serif;font-size:15px;font-weight:700}
+.done-sub{font-size:12.5px;opacity:0.7;margin-top:2px}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:22px;right:22px;background:#1A1A1A;color:#fff;padding:11px 18px;border-radius:var(--rs);font-size:13px;font-weight:500;box-shadow:var(--shadowL);opacity:0;transform:translateY(8px);transition:opacity 0.2s,transform 0.2s;z-index:9999;display:flex;align-items:center;gap:8px;max-width:320px}
+.toast.show{opacity:1;transform:translateY(0)}
+.toast.ok{background:var(--teal-dark)}
+.toast.word{background:#2B5797}
+.toast.err{background:#8B1A1A}
+
+/* ── PANELS ── */
+.panel{display:none}
+.panel.active{display:block;animation:fadeUp 0.22s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── MOBILE ── */
+@media(max-width:768px){
+  .sidebar{width:100%;min-height:auto;position:relative}
+  .main{margin-left:0;padding:20px 16px 40px;max-width:100vw}
+  .shell{flex-direction:column}
+  .form-grid{grid-template-columns:1fr}
+  .nar-grid{grid-template-columns:1fr 1fr}
+}
+@media print{
+  .sidebar,.btn-row,.topbar-right{display:none!important}
+  .main{margin-left:0;padding:20px}
+  .panel{display:block!important}
+}
+
+/* ── DIVIDER ── */
+.divider{height:1px;background:var(--border);margin:20px 0}
+</style>
+</head>
+<body>
+<div class="shell">
+
+<!-- ════════════════════ SIDEBAR ════════════════════ -->
+<nav class="sidebar">
+  <div class="brand">
+    <div class="brand-icon">🦙</div>
+    <div>
+      <div class="brand-name">ConoSur<br>Narrativas</div>
+      <div class="brand-year">Alto vuelo - Alto valor</div>
+    </div>
+  </div>
+
+  <div class="nav-label">Flujo de trabajo</div>
+  <button class="nav-item active" onclick="goStep(1)" id="nb1">
+    <span class="nav-icon">🎯</span><span style="flex:1">Radar narrativo</span><span class="nav-check">✓</span>
+  </button>
+  <button class="nav-item" onclick="goStep(2)" id="nb2">
+    <span class="nav-icon">🌐</span><span style="flex:1">Macronarrativa</span><span class="nav-check">✓</span>
+  </button>
+  <button class="nav-item" onclick="goStep(3)" id="nb3">
+    <span class="nav-icon">✍️</span><span style="flex:1">One-pager</span><span class="nav-check">✓</span>
+  </button>
+  <button class="nav-item" onclick="goStep(4)" id="nb4">
+    <span class="nav-icon">📄</span><span style="flex:1">Resultado</span><span class="nav-check">✓</span>
+  </button>
+
+  <div class="nav-divider"></div>
+  <div class="nav-label">Herramientas</div>
+  <button class="nav-item" onclick="toggleDark()">
+    <span class="nav-icon" id="darkIcon">🌙</span><span style="flex:1" id="darkLabel">Modo oscuro</span>
+  </button>
+  <button class="nav-item" onclick="resetAll()">
+    <span class="nav-icon">🔄</span><span style="flex:1">Reiniciar</span>
+  </button>
+  <button class="nav-item" onclick="window.print()">
+    <span class="nav-icon">🖨️</span><span style="flex:1">Imprimir</span>
+  </button>
+
+  <div class="nav-divider"></div>
+  <div class="autosave-indicator" id="autosaveStatus">
+    <div class="autosave-dot"></div> Sin cambios guardados
+  </div>
+
+  <div class="sidebar-radar">
+    <div class="radar-lbl">Potencial narrativo</div>
+    <div class="radar-bar"><div class="radar-fill" id="radarFill"></div></div>
+    <div class="radar-txt" id="radarTxt">0 de 7 criterios</div>
+  </div>
+</nav>
+
+<!-- ════════════════════ MAIN ════════════════════ -->
+<main class="main">
+
+<!-- ══ PASO 1: RADAR ══ -->
+<div class="panel active" id="p1">
+  <div class="topbar">
+    <div>
+      <div class="page-title">Activa tu radar narrativo</div>
+      <div class="page-sub">Reflexión rápida (&lt;5 min) · Marca los criterios que aplican a tu producto.</div>
+    </div>
+    <div class="topbar-right">
+      <div class="icon-btn" onclick="toggleDark()" title="Modo oscuro">🌙</div>
+      <div class="step-pill">Paso 1 / 4</div>
+    </div>
+  </div>
+  <div class="progress"><div class="pdot active"></div><div class="pdot"></div><div class="pdot"></div><div class="pdot"></div></div>
+
+  <div id="checkWrap">
+    <div class="ci" onclick="toggleCheck(0)" id="ci0"><div class="cbox"><span class="ctick">✓</span></div><div><div class="ci-strong">¿Es relevante y actual?</div><div class="ci-desc">¿Conecta con prioridades de Alemania/Europa? (seguridad, economía, migración cualificada, cambio climático)</div></div></div>
+    <div class="ci" onclick="toggleCheck(1)" id="ci1"><div class="cbox"><span class="ctick">✓</span></div><div><div class="ci-strong">¿Tiene un resultado o hallazgo concreto?</div><div class="ci-desc">¿Ya entregó un resultado visible, idea validada, piloto exitoso o aprendizaje potente?</div></div></div>
+    <div class="ci" onclick="toggleCheck(2)" id="ci2"><div class="cbox"><span class="ctick">✓</span></div><div><div class="ci-strong">¿Hay un rol claro de la cooperación?</div><div class="ci-desc">¿Se puede ver qué aportó la cooperación alemana y qué diferencia hizo?</div></div></div>
+    <div class="ci" onclick="toggleCheck(3)" id="ci3"><div class="cbox"><span class="ctick">✓</span></div><div><div class="ci-strong">¿Tiene conexión con impactos concretos para Alemania?</div><div class="ci-desc">¿Abre oportunidades al sector privado, protege un bien público global o mejora vidas?</div></div></div>
+    <div class="ci" onclick="toggleCheck(4)" id="ci4"><div class="cbox"><span class="ctick">✓</span></div><div><div class="ci-strong">¿Genera conversación o empatía?</div><div class="ci-desc">¿Despierta curiosidad, emoción, reflexión, orgullo o sorpresa?</div></div></div>
+    <div class="ci" onclick="toggleCheck(5)" id="ci5"><div class="cbox"><span class="ctick">✓</span></div><div><div class="ci-strong">¿Tiene evidencia o visuales disponibles?</div><div class="ci-desc">¿Hay texto, imágenes, citas, testimonios, datos o mapas ya disponibles?</div></div></div>
+    <div class="ci" onclick="toggleCheck(6)" id="ci6"><div class="cbox"><span class="ctick">✓</span></div><div><div class="ci-strong">¿Abre puertas a otros actores o procesos?</div><div class="ci-desc">¿Podría fortalecer una alianza, escalar la solución o influir en la agenda mediática en Alemania/Europa?</div></div></div>
+  </div>
+
+  <div class="score-box">
+    <div><div class="score-n" id="scoreN">0<sub>/7</sub></div></div>
+    <div class="score-track">
+      <div class="score-bar"><div class="score-fill" id="scoreFill"></div></div>
+      <div class="score-status s-gray" id="scoreStatus">Marca los criterios que aplican</div>
+    </div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-primary" onclick="goStep(2)">Continuar →</button>
+  </div>
+</div>
+
+<!-- ══ PASO 2: NARRATIVA ══ -->
+<div class="panel" id="p2">
+  <div class="topbar">
+    <div>
+      <div class="page-title">Elige tu macronarrativa</div>
+      <div class="page-sub">Selecciona el marco estratégico y completa el contexto del producto.</div>
+    </div>
+    <div class="topbar-right">
+      <div class="icon-btn" onclick="toggleDark()" title="Modo oscuro">🌙</div>
+      <div class="step-pill">Paso 2 / 4</div>
+    </div>
+  </div>
+  <div class="progress"><div class="pdot done"></div><div class="pdot active"></div><div class="pdot"></div><div class="pdot"></div></div>
+
+  <div class="card">
+    <div class="card-title"><span class="card-icon">🎯</span> Las 5 macronarrativas estratégicas ConoSur</div>
+    <div class="nar-grid" id="narGrid">
+      <div class="nc" onclick="selectNar(0)" id="nc0" style="--nc-color:#E8621A;--nc-bg:#FEF3EE">
+        <div class="nc-check">✓</div><div class="nc-emoji">🤝</div>
+        <div class="nc-title">Make your friends before you need them</div>
+        <div class="nc-sub">Alianzas estratégicas para desafíos globales</div>
+      </div>
+      <div class="nc" onclick="selectNar(1)" id="nc1" style="--nc-color:#C4006A;--nc-bg:#FBEAF0">
+        <div class="nc-check">✓</div><div class="nc-emoji">💼</div>
+        <div class="nc-title">Win-win effect more visible</div>
+        <div class="nc-sub">Sector privado como palanca estratégica</div>
+      </div>
+      <div class="nc" onclick="selectNar(2)" id="nc2" style="--nc-color:#185FA5;--nc-bg:#EAF1FB">
+        <div class="nc-check">✓</div><div class="nc-emoji">🌍</div>
+        <div class="nc-title">What happens in the Global South stays not in the Global South</div>
+        <div class="nc-sub">Protección de bienes públicos globales</div>
+      </div>
+      <div class="nc" onclick="selectNar(3)" id="nc3" style="--nc-color:#1D9E75;--nc-bg:#E1F5EE">
+        <div class="nc-check">✓</div><div class="nc-emoji">👤</div>
+        <div class="nc-title">Human impact of cooperation</div>
+        <div class="nc-sub">Beneficios tangibles para personas</div>
+      </div>
+      <div class="nc" onclick="selectNar(4)" id="nc4" style="--nc-color:#D4A017;--nc-bg:#FDF8EE">
+        <div class="nc-check">✓</div><div class="nc-emoji">💶</div>
+        <div class="nc-title">Every euro invested...</div>
+        <div class="nc-sub">Eficiencia, retorno e inversión escalable</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span class="card-icon">📋</span> Contexto del producto</div>
+    <div class="form-grid">
+      <div class="fg">
+        <label class="flabel">Proyecto
+          <span class="hint-btn">?<div class="tip">Nombre del proyecto GIZ que genera el insumo.<div class="tip-ex">Ej: PROAGUA · D4R · SimTDP · DLAB · Digitalízate</div></div></span>
+        </label>
+        <input type="text" id="inp_proyecto" placeholder="Ej. PROAGUA, D4R..." oninput="autosave()">
+      </div>
+      <div class="fg">
+        <label class="flabel">País(es)
+          <span class="hint-btn">?<div class="tip">País o países donde se implementó.<div class="tip-ex">Ej: Perú · Chile · Argentina</div></div></span>
+        </label>
+        <input type="text" id="inp_pais" placeholder="Ej. Perú, Chile..." oninput="autosave()">
+      </div>
+      <div class="fg">
+        <label class="flabel">Grupo meta
+          <span class="hint-btn">?<div class="tip">¿A quién va dirigida principalmente la comunicación?<div class="tip-ex">Ej: Sector privado alemán · Ciudadanía · Embajada</div></div></span>
+        </label>
+        <input type="text" id="inp_grupometa" placeholder="Ej. Sector privado..." oninput="autosave()">
+      </div>
+      <div class="fg">
+        <label class="flabel">Dato clave
+          <span class="hint-btn">?<div class="tip">Un número o hecho concreto que resuma el impacto. Cuanto más específico, más potente.<div class="tip-ex">Ej: "60,000 personas beneficiadas" · "2M EUR generados"</div></div></span>
+        </label>
+        <input type="text" id="inp_dato" placeholder="Ej. 60,000 personas..." oninput="autosave()">
+      </div>
+      <div class="fg full">
+        <label class="flabel">Ángulo de apertura (opcional)
+          <span class="hint-btn">?<div class="tip">Una pregunta o imagen inesperada. No tiene que ser perfecta, es punto de partida.<div class="tip-ex">Ej: "¿Y si la próxima expansión de tu empresa no fuera en Múnich sino en Perú?"</div></div></span>
+        </label>
+        <input type="text" id="inp_hook" placeholder="¿Y si...? / Imagina que..." oninput="autosave()">
+      </div>
+    </div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-ghost" onclick="goStep(1)">← Volver</button>
+    <button class="btn btn-primary" onclick="goStep(3)">Continuar →</button>
+  </div>
+</div>
+
+<!-- ══ PASO 3: ONE-PAGER ══ -->
+<div class="panel" id="p3">
+  <div class="topbar">
+    <div>
+      <div class="page-title">Redacta tu one-pager</div>
+      <div class="page-sub">Usa las preguntas como guía de reflexión. Máx. <strong>650 palabras</strong>.</div>
+    </div>
+    <div class="topbar-right">
+      <div class="icon-btn" onclick="toggleDark()">🌙</div>
+      <div id="totalWC" class="step-pill" style="background:var(--surface2);color:var(--text2);border:1px solid var(--border2)">0/650</div>
+      <div class="step-pill">Paso 3 / 4</div>
+    </div>
+  </div>
+  <div class="progress"><div class="pdot done"></div><div class="pdot done"></div><div class="pdot active"></div><div class="pdot"></div></div>
+
+  <!-- Título -->
+  <div class="card">
+    <div class="card-title"><span class="card-icon">💡</span> 1. Título</div>
+    <div class="fhint">Claro, inspirador, no técnico. KISS. Como un titular de artículo de opinión o idea fuerza para redes.</div>
+    <div class="ex-trigger">✨ Ejemplo — caso Agua
+      <div class="expop">
+        <div class="ep-tag">Ejemplo comentado</div>
+        <div class="ep-title">Tecnología alemana para el desarrollo sostenible: el sector privado como socio estratégico en América Latina</div>
+        <div class="ep-text">Une un concepto-país potente con un llamado de acción global y un espacio de oportunidad concreto.</div>
+        <div class="ep-why">✅ Conecta directamente con objetivos ConoSur y tiene fuerza de "idea fuerza" para discursos.</div>
+      </div>
+    </div>
+    <input type="text" id="f_titulo" placeholder="Ej. Tecnología alemana para el desarrollo sostenible..." oninput="updateCount();autosave()">
+  </div>
+
+  <!-- Intro -->
+  <div class="card">
+    <div class="card-title"><span class="card-icon">🎬</span> 2. Introducción — ¿de qué trata y qué problema resuelve?</div>
+    <div class="fhint">¿Qué es? ¿Dónde? ¿Con quién? ¿Qué lo hace diferente para Alemania/Europa? Empieza con una pregunta o imagen inesperada.</div>
+    <div class="ex-trigger">✨ Ejemplo — caso Agua
+      <div class="expop">
+        <div class="ep-tag">Apertura con gancho</div>
+        <div class="ep-title">¿Y si la próxima expansión de tu empresa no fuera en Múnich sino en las plantas de agua residual del sur global?</div>
+        <div class="ep-text">Durante años, miles de familias en Trujillo vivieron expuestas a agua sin tratar. Hoy, gracias a tecnología FUCHS, la ciudad duplicó su capacidad.</div>
+        <div class="ep-why">✅ Inicio provocador. Plantea una pregunta y presenta problema + solución en pocas líneas.</div>
+      </div>
+    </div>
+    <textarea id="f_intro" rows="4" placeholder="¿Y si...? Durante años... Hoy, gracias a..." oninput="updateCount();autosave()"></textarea>
+    <div class="wc" id="wc_intro">0 palabras</div>
+  </div>
+
+  <!-- Relevancia -->
+  <div class="card">
+    <div class="card-title"><span class="card-icon">🔥</span> 3. ¿Qué lo hace relevante HOY?</div>
+    <div class="fhint">¿Con qué objetivo estratégico ConoSur conecta? ¿Con qué prioridad alemana o europea? Siempre vincularte con la agenda de comitentes.</div>
+    <div class="ex-trigger">✨ Ejemplo — caso Agua
+      <div class="expop">
+        <div class="ep-tag">Conexión estratégica</div>
+        <div class="ep-text">"Este caso se enmarca en la visión del BMZ 2030, que busca catalizar transformaciones estructurales sostenibles mediante soluciones con alto valor agregado alemán."</div>
+        <div class="ep-why">✅ Conecta directamente con la agenda alemana sin tecnicismos.</div>
+      </div>
+    </div>
+    <textarea id="f_relevancia" rows="3" placeholder="Conecta con la agenda del BMZ 2030 / prioridades de seguridad / economía circular..." oninput="updateCount();autosave()"></textarea>
+    <div class="wc" id="wc_relevancia">0 palabras</div>
+  </div>
+
+  <!-- Impacto -->
+  <div class="card">
+    <div class="card-title"><span class="card-icon">📈</span> 4. ¿Qué impacto o transformación genera?</div>
+    <div class="fhint">¿Resultados visibles/medibles? ¿Escalable? ¿A quién beneficia? Usa cifras. Conecta con transiciones globales (clima, economía circular, seguridad).</div>
+    <div class="ex-trigger">✨ Ejemplo — caso Agua
+      <div class="expop">
+        <div class="ep-tag">Escala e impacto</div>
+        <div class="ep-text">"En Perú existen más de 120 plantas de tratamiento con sistemas obsoletos. En las primeras 30 evaluadas, se estima un mercado potencial superior a los 10 millones de euros."</div>
+        <div class="ep-why">✅ Cifras concretas que muestran escala y potencial de replicación.</div>
+      </div>
+    </div>
+    <textarea id="f_impacto" rows="4" placeholder="El impacto fue inmediato: [N] personas beneficiadas. Este caso abre la puerta a..." oninput="updateCount();autosave()"></textarea>
+    <div class="wc" id="wc_impacto">0 palabras</div>
+  </div>
+
+  <!-- Rol cooperación -->
+  <div class="card">
+    <div class="card-title"><span class="card-icon">🇩🇪</span> 5. ¿Cuál fue el rol de la cooperación alemana / GIZ?</div>
+    <div class="fhint">¿Cómo se involucró? ¿Qué hizo posible, único o diferente? No exageres el protagonismo — muéstrate como facilitador estratégico.</div>
+    <div class="ex-trigger">✨ Ejemplo — caso Agua
+      <div class="expop">
+        <div class="ep-tag">Facilitador estratégico</div>
+        <div class="ep-text">"La cooperación alemana, implementada por GIZ a través de PROAGUA, acompañó a Sedalib en la búsqueda de una solución sostenible, eficiente y replicable."</div>
+        <div class="ep-why">✅ Menciona el rol con claridad, sin exagerar. Muestra como facilitador, no protagonista.</div>
+      </div>
+    </div>
+    <textarea id="f_rol" rows="3" placeholder="La cooperación alemana, implementada por GIZ a través de [proyecto], acompañó a..." oninput="updateCount();autosave()"></textarea>
+    <div class="wc" id="wc_rol">0 palabras</div>
+  </div>
+
+  <!-- Elementos narrativos -->
+  <div class="card">
+    <div class="card-title"><span class="card-icon">✨</span> 6. ¿Qué lo hace narrativamente potente?</div>
+    <div class="fhint">Marca los elementos que tiene tu historia (puede ser más de uno).</div>
+    <div class="chips" id="elemChips">
+      <div class="chip" onclick="this.classList.toggle('sel')">Idea contraintuitiva</div>
+      <div class="chip" onclick="this.classList.toggle('sel')">Historia humana</div>
+      <div class="chip" onclick="this.classList.toggle('sel')">Giro inesperado</div>
+      <div class="chip" onclick="this.classList.toggle('sel')">Alianza improbable</div>
+      <div class="chip" onclick="this.classList.toggle('sel')">Cambio de mentalidad</div>
+      <div class="chip" onclick="this.classList.toggle('sel')">Conexión visual potente</div>
+      <div class="chip" onclick="this.classList.toggle('sel')">Testimonio memorable</div>
+      <div class="chip" onclick="this.classList.toggle('sel')">Ángulo poco contado</div>
+      <div class="chip" onclick="this.classList.toggle('sel')">Escalamiento demostrado</div>
+      <div class="chip" onclick="this.classList.toggle('sel')">Dato sorprendente</div>
+    </div>
+  </div>
+
+  <!-- Cierre -->
+  <div class="card">
+    <div class="card-title"><span class="card-icon">🚀</span> 7. Cierre inspirador</div>
+    <div class="fhint">Termina con un mensaje de futuro, alianza y transformación. Ideal para discursos, posts o pitch de alto nivel.</div>
+    <div class="ex-trigger">✨ Ejemplo — caso Agua
+      <div class="expop">
+        <div class="ep-tag">Cierre con visión de futuro</div>
+        <div class="ep-text">"El caso Trujillo muestra cómo innovación, confianza y cooperación pueden cruzar fronteras para mejorar vidas, proteger el ambiente y abrir mercados verdes emergentes."</div>
+        <div class="ep-why">✅ Marca la idea fuerza central. Habla de futuro, alianza y transformación.</div>
+      </div>
+    </div>
+    <textarea id="f_cierre" rows="3" placeholder="Este caso muestra cómo la cooperación puede cruzar fronteras para..." oninput="updateCount();autosave()"></textarea>
+    <div class="wc" id="wc_cierre">0 palabras</div>
+  </div>
+
+  <!-- Insumos -->
+  <div class="card">
+    <div class="card-title"><span class="card-icon">📦</span> 8. Insumos disponibles</div>
+    <div class="fhint">¿Qué materiales ya tienes para acompañar la narrativa?</div>
+    <div class="chips" id="insumosChips">
+      <div class="chip" onclick="this.classList.toggle('sel')">📷 Fotos</div>
+      <div class="chip" onclick="this.classList.toggle('sel')">📊 Datos / gráficas</div>
+      <div class="chip" onclick="this.classList.toggle('sel')">💬 Citas / testimonios</div>
+      <div class="chip" onclick="this.classList.toggle('sel')">📄 Documento de base</div>
+      <div class="chip" onclick="this.classList.toggle('sel')">🎥 Video / audio</div>
+      <div class="chip" onclick="this.classList.toggle('sel')">🗺️ Mapa</div>
+      <div class="chip" onclick="this.classList.toggle('sel')">📰 Nota de prensa</div>
+    </div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-ghost" onclick="goStep(2)">← Volver</button>
+    <button class="btn btn-primary" onclick="buildOutput();goStep(4)">Generar resultado →</button>
+  </div>
+</div>
+
+<!-- ══ PASO 4: RESULTADO ══ -->
+<div class="panel" id="p4">
+  <div class="topbar">
+    <div>
+      <div class="page-title">Tu producto intermedio</div>
+      <div class="page-sub">Revisa, exporta y envia a Comunicaciones ConoSur.</div>
+    </div>
+    <div class="topbar-right">
+      <div class="icon-btn" onclick="toggleDark()">🌙</div>
+      <div class="step-pill">✓ Listo</div>
+    </div>
+  </div>
+  <div class="progress"><div class="pdot done"></div><div class="pdot done"></div><div class="pdot done"></div><div class="pdot active"></div></div>
+
+  <div class="done-banner">
+    <div class="done-icon">🎉</div>
+    <div>
+      <div class="done-title">¡Producto intermedio listo!</div>
+      <div class="done-sub">Revisa el contenido, exporta a Word y envia a Comunicaciones ConoSur.</div>
+    </div>
+  </div>
+
+  <div id="outputContent"></div>
+
+  <div class="matrix-wrap">
+    <div class="matrix-head">Matriz narrativa</div>
+    <div style="overflow-x:auto"><table class="mt" id="matrizTable"></table></div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-ghost" onclick="goStep(3)">← Editar</button>
+    <button class="btn btn-ghost" onclick="copyTXT()" id="copyBtn">📋 Copiar texto</button>
+    <button class="btn btn-ghost" onclick="exportTXT()">⬇️ Exportar .txt</button>
+    <button class="btn btn-word" onclick="exportWord()" id="wordBtn">📝 Exportar Word (.docx)</button>
+    <button class="btn btn-primary" onclick="goStep(1)">+ Nuevo producto</button>
+  </div>
+</div>
+
+</main>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+/* ═══════════════ STATE ═══════════════ */
+const checks = Array(7).fill(false);
+let selNar = -1;
+const NAR_NAMES = [
+  'Make your friends before you need them',
+  'Win-win effect more visible',
+  'What happens in the Global South stays not in the Global South',
+  'Human impact of cooperation',
+  'Every euro invested...'
+];
+const NAR_SUBS = [
+  'Alianzas estratégicas para desafíos globales',
+  'Sector privado como palanca estratégica',
+  'Protección de bienes públicos globales',
+  'Beneficios tangibles para personas',
+  'Eficiencia, retorno e inversión escalable'
+];
+let autosaveTimer = null;
+let isDark = false;
+
+/* ═══════════════ STEP NAV ═══════════════ */
+function goStep(n){
+  for(let i=1;i<=4;i++){
+    document.getElementById('p'+i).classList.toggle('active',i===n);
+    const b=document.getElementById('nb'+i);
+    b.classList.remove('active','done');
+    if(i===n) b.classList.add('active');
+    else if(i<n) b.classList.add('done');
+  }
+  window.scrollTo({top:0,behavior:'smooth'});
+  updateCount();
+}
+
+/* ═══════════════ CHECKLIST ═══════════════ */
+function toggleCheck(i){
+  checks[i]=!checks[i];
+  document.getElementById('ci'+i).classList.toggle('checked',checks[i]);
+  updateScore();
+  autosave();
+}
+function updateScore(){
+  const n=checks.filter(Boolean).length;
+  document.getElementById('scoreN').innerHTML=n+'<sub>/7</sub>';
+  document.getElementById('scoreFill').style.width=(n/7*100)+'%';
+  document.getElementById('radarFill').style.width=(n/7*100)+'%';
+  document.getElementById('radarTxt').textContent=n+' de 7 criterios';
+  const el=document.getElementById('scoreStatus');
+  if(n>=4){el.textContent='¡Potencial narrativo confirmado! Este insumo está listo para avanzar.';el.className='score-status s-green';}
+  else if(n>=2){el.textContent='Potencial moderado. Puede necesitar mayor foco o evidencia adicional.';el.className='score-status s-amber';}
+  else{el.textContent='Marca los criterios que aplican a tu producto intermedio.';el.className='score-status s-gray';}
+}
+
+/* ═══════════════ MACRONARRATIVA ═══════════════ */
+function selectNar(i){
+  selNar=i;
+  document.querySelectorAll('.nc').forEach((c,j)=>c.classList.toggle('sel',j===i));
+  autosave();
+}
+
+/* ═══════════════ WORD COUNT ═══════════════ */
+function wc(s){return s&&s.trim()?s.trim().split(/\s+/).length:0}
+function updateCount(){
+  const fields=['intro','relevancia','impacto','rol','cierre'];
+  let total=wc(v('f_titulo'));
+  fields.forEach(f=>{
+    const n=wc(v('f_'+f));
+    total+=n;
+    const el=document.getElementById('wc_'+f);
+    if(el){el.textContent=n+' palabras';el.className='wc'+(n>150?' warn':'');}
+  });
+  const tc=document.getElementById('totalWC');
+  if(tc){
+    tc.textContent=total+'/650';
+    tc.style.background=total>650?'#FCEBEB':total>500?'#FDF8EE':'var(--surface2)';
+    tc.style.color=total>650?'#A32D2D':total>500?'#7A5800':'var(--text2)';
+  }
+}
+const v=(id)=>document.getElementById(id)?.value?.trim()||'';
+
+/* ═══════════════ BUILD OUTPUT ═══════════════ */
+function buildOutput(){
+  const titulo=v('f_titulo')||'[Sin título]';
+  const intro=v('f_intro'),rel=v('f_relevancia'),imp=v('f_impacto'),rol=v('f_rol'),cierre=v('f_cierre');
+  const proyecto=v('inp_proyecto')||'—',pais=v('inp_pais')||'—',gm=v('inp_grupometa')||'—',dato=v('inp_dato')||'—',hook=v('inp_hook');
+  const narLabel=selNar>=0?NAR_NAMES[selNar]:'No seleccionada';
+  const narSub=selNar>=0?NAR_SUBS[selNar]:'';
+  const selEls=Array.from(document.querySelectorAll('#elemChips .chip.sel')).map(e=>e.textContent);
+  const selIns=Array.from(document.querySelectorAll('#insumosChips .chip.sel')).map(e=>e.textContent);
+
+  let html=`<div class="out-hero">
+    <div class="out-nar-pill">🎯 ${narLabel}</div>
+    <div class="out-title">${titulo}</div>
+    <div class="out-meta"><span>📍 ${pais}</span><span>🗂 ${proyecto}</span><span>👥 ${gm}</span>${dato!=='—'?`<span>📊 ${dato}</span>`:''}</div>
+  </div>`;
+
+  if(hook) html+=osec('Ángulo de apertura','<em style="color:var(--text2)">'+hook+'</em>');
+  if(intro) html+=osec('Introducción',intro.replace(/\n/g,'<br>'));
+  if(rel)   html+=osec('Relevancia actual',rel.replace(/\n/g,'<br>'));
+  if(imp)   html+=osec('Impacto y transformación',imp.replace(/\n/g,'<br>'));
+  if(rol)   html+=osec('Rol de la cooperación alemana / GIZ',rol.replace(/\n/g,'<br>'));
+  if(selEls.length) html+=`<div class="out-sec"><div class="out-sec-lbl">Elementos narrativos</div><div class="out-sec-txt">${selEls.map(e=>`<span class="tag g">${e}</span>`).join('')}</div></div>`;
+  if(cierre) html+=osec('Cierre',cierre.replace(/\n/g,'<br>'));
+  if(selIns.length) html+=`<div class="out-sec"><div class="out-sec-lbl">Insumos disponibles</div><div class="out-sec-txt">${selIns.map(e=>`<span class="tag">${e}</span>`).join('')}</div></div>`;
+
+  document.getElementById('outputContent').innerHTML=html;
+
+  document.getElementById('matrizTable').innerHTML=`
+    <tr><th>Proyecto</th><th>Narrativa</th><th>Hecho de relevancia</th><th>Evidencia</th><th>Grupo meta</th><th>Score</th></tr>
+    <tr>
+      <td><strong>${proyecto}</strong><br><small style="color:var(--text3)">${pais}</small></td>
+      <td>${narLabel}<br><small style="color:var(--text3)">${narSub}</small></td>
+      <td style="font-size:12px">${rel?rel.substring(0,100)+(rel.length>100?'...':''):'—'}</td>
+      <td style="font-size:12px">${dato}</td>
+      <td>${gm}</td>
+      <td><strong style="color:var(--teal)">${checks.filter(Boolean).length}/7</strong></td>
+    </tr>`;
+}
+function osec(lbl,txt){return`<div class="out-sec"><div class="out-sec-lbl">${lbl}</div><div class="out-sec-txt">${txt}</div></div>`;}
+
+/* ═══════════════ EXPORT TXT ═══════════════ */
+function getFullText(){
+  const lines=[
+    'NARRATIVAS CONOSUR 2025 — PRODUCTO INTERMEDIO',
+    '══════════════════════════════════════════════',
+    `Macronarrativa: ${selNar>=0?NAR_NAMES[selNar]:'No seleccionada'}`,
+    `Proyecto: ${v('inp_proyecto')||'—'} | País: ${v('inp_pais')||'—'} | Dato clave: ${v('inp_dato')||'—'}`,
+    `Score radar: ${checks.filter(Boolean).length}/7`,''
+  ];
+  const add=(lbl,val)=>{if(val){lines.push(lbl.toUpperCase());lines.push(val);lines.push('');}};
+  add('Título',v('f_titulo'));
+  add('Ángulo de apertura',v('inp_hook'));
+  add('Introducción',v('f_intro'));
+  add('Relevancia actual',v('f_relevancia'));
+  add('Impacto y transformación',v('f_impacto'));
+  add('Rol de la cooperación',v('f_rol'));
+  add('Cierre',v('f_cierre'));
+  const els=Array.from(document.querySelectorAll('#elemChips .chip.sel')).map(e=>e.textContent);
+  const ins=Array.from(document.querySelectorAll('#insumosChips .chip.sel')).map(e=>e.textContent);
+  if(els.length){lines.push('ELEMENTOS NARRATIVOS');lines.push(els.join(' · '));lines.push('');}
+  if(ins.length){lines.push('INSUMOS DISPONIBLES');lines.push(ins.join(' · '));lines.push('');}
+  lines.push('—');lines.push('Generado con Kit de Narrativas ConoSur 2025');
+  return lines.join('\n');
+}
+function exportTXT(){
+  const blob=new Blob([getFullText()],{type:'text/plain;charset=utf-8'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  const slug=(v('f_titulo')||'producto').slice(0,30).replace(/[^a-zA-Z0-9áéíóúñÁÉÍÓÚÑ ]/g,'').replace(/ /g,'_');
+  a.download=`ConoSur2025_${slug}.txt`;
+  a.click();
+  showToast('Archivo .txt exportado','ok');
+}
+function copyTXT(){
+  navigator.clipboard.writeText(getFullText()).then(()=>showToast('¡Texto copiado al portapapeles!','ok'));
+}
+
+/* ═══════════════ EXPORT WORD ═══════════════ */
+async function exportWord(){
+  const btn=document.getElementById('wordBtn');
+  btn.classList.add('btn-loading');
+  btn.textContent='⏳ Generando...';
+
+  try{
+    const {Document,Packer,Paragraph,TextRun,Table,TableRow,TableCell,
+           AlignmentType,BorderStyle,WidthType,ShadingType,LevelFormat,HeadingLevel} = docx;
+
+    const TEAL='1D9E75',TEAL_D='0F6E56',DARK='1A1A1A',MID='555550',LIGHT='E1F5EE',GRAY='F7F7F5';
+    const b1={style:BorderStyle.SINGLE,size:1,color:'DDDDDD'};
+    const bAll={top:b1,bottom:b1,left:b1,right:b1};
+    const cellMargins={top:80,bottom:80,left:120,right:120};
+
+    const titulo=v('f_titulo')||'[Sin título]';
+    const intro=v('f_intro'),rel=v('f_relevancia'),imp=v('f_impacto'),rol=v('f_rol'),cierre=v('f_cierre');
+    const proyecto=v('inp_proyecto')||'—',pais=v('inp_pais')||'—',gm=v('inp_grupometa')||'—',dato=v('inp_dato')||'—',hook=v('inp_hook');
+    const narLabel=selNar>=0?NAR_NAMES[selNar]:'No seleccionada';
+    const narSub=selNar>=0?NAR_SUBS[selNar]:'';
+    const selEls=Array.from(document.querySelectorAll('#elemChips .chip.sel')).map(e=>e.textContent.trim());
+    const selIns=Array.from(document.querySelectorAll('#insumosChips .chip.sel')).map(e=>e.textContent.trim());
+    const scoreN=checks.filter(Boolean).length;
+
+    // ── helpers ──
+    const H=(text,color=TEAL)=>new Paragraph({
+      children:[new TextRun({text,bold:true,size:20,color,font:'Arial'})],
+      spacing:{before:240,after:60},
+      border:{bottom:{style:BorderStyle.SINGLE,size:4,color:TEAL,space:1}}
+    });
+    const Body=(text,color=DARK)=>new Paragraph({
+      children:[new TextRun({text,size:21,font:'Arial',color})],
+      spacing:{before:80,after:160}
+    });
+    const Spacer=()=>new Paragraph({children:[],spacing:{before:80,after:80}});
+
+    // ── header block ──
+    const headerRow=new TableRow({children:[
+      new TableCell({
+        width:{size:9026,type:WidthType.DXA},
+        shading:{fill:'0F6E56',type:ShadingType.CLEAR},
+        borders:{top:b1,bottom:b1,left:b1,right:b1},
+        margins:{top:140,bottom:140,left:200,right:200},
+        children:[
+          new Paragraph({children:[new TextRun({text:'NARRATIVAS CONOSUR 2025',bold:true,size:24,color:'FFFFFF',font:'Arial'})]}),
+          new Paragraph({children:[new TextRun({text:'Producto Intermedio · Kit de Narrativas · Alto Vuelo',size:18,color:'DDEEDD',font:'Arial'})],spacing:{before:40}}),
+        ]
+      })
+    ]});
+    const headerTable=new Table({
+      width:{size:9026,type:WidthType.DXA},
+      columnWidths:[9026],
+      rows:[headerRow]
+    });
+
+    // ── meta row ──
+    const metaCell=(label,val)=>new TableCell({
+      width:{size:2256,type:WidthType.DXA},
+      borders:bAll,
+      shading:{fill:GRAY,type:ShadingType.CLEAR},
+      margins:cellMargins,
+      children:[
+        new Paragraph({children:[new TextRun({text:label,size:16,bold:true,color:'888880',font:'Arial'})]}),
+        new Paragraph({children:[new TextRun({text:val,size:18,bold:true,color:DARK,font:'Arial'})],spacing:{before:40}})
+      ]
+    });
+    const metaTable=new Table({
+      width:{size:9026,type:WidthType.DXA},
+      columnWidths:[2256,2256,2256,2258],
+      rows:[new TableRow({children:[metaCell('Proyecto',proyecto),metaCell('País',pais),metaCell('Grupo meta',gm),metaCell('Dato clave',dato)]})]
+    });
+
+    // ── section helper ──
+    const Section=(label,text)=>{
+      if(!text) return [];
+      return[
+        H(label),
+        Body(text)
+      ];
+    };
+
+    // ── narrative elements ──
+    const elems=selEls.length?[
+      H('Elementos narrativos'),
+      new Paragraph({
+        children:selEls.map((e,i)=>[
+          new TextRun({text:'  '+e+'  ',size:18,bold:true,color:TEAL_D,font:'Arial',
+            shading:{fill:LIGHT,type:ShadingType.CLEAR}}),
+          i<selEls.length-1?new TextRun({text:' · ',size:18,color:'AAAAAA',font:'Arial'}):new TextRun({text:'',size:18})
+        ]).flat(),
+        spacing:{before:80,after:160}
+      })
+    ]:[];
+
+    // ── matrix table ──
+    const mHead=(t)=>new TableCell({
+      width:{size:1504,type:WidthType.DXA},
+      shading:{fill:'111110',type:ShadingType.CLEAR},
+      borders:bAll,margins:cellMargins,
+      children:[new Paragraph({children:[new TextRun({text:t,size:16,bold:true,color:'FFFFFF',font:'Arial'})]})]
+    });
+    const mCell=(t,color=DARK)=>new TableCell({
+      width:{size:1504,type:WidthType.DXA},
+      borders:bAll,margins:cellMargins,
+      children:[new Paragraph({children:[new TextRun({text:t,size:17,color,font:'Arial'})]})]
+    });
+    const matTable=new Table({
+      width:{size:9026,type:WidthType.DXA},
+      columnWidths:[1504,1800,2218,1200,1200,1104],
+      rows:[
+        new TableRow({children:[mHead('Proyecto'),mHead('Narrativa'),mHead('Hecho de relevancia'),mHead('Evidencia'),mHead('Grupo meta'),mHead('Score')]}),
+        new TableRow({children:[
+          mCell(proyecto),mCell(narLabel+'\n'+narSub,MID),
+          mCell(rel?rel.substring(0,120)+(rel.length>120?'...':''):'—'),
+          mCell(dato),mCell(gm),mCell(scoreN+'/7',TEAL)
+        ]})
+      ]
+    });
+
+    // ── footer ──
+    const footer=new Paragraph({
+      children:[new TextRun({text:`Generado con Kit de Narrativas ConoSur 2025  ·  ${new Date().toLocaleDateString('es-CL')}  ·  Comunicaciones ConoSur / GIZ`,size:16,color:'AAAAAA',font:'Arial'})],
+      spacing:{before:400},
+      border:{top:{style:BorderStyle.SINGLE,size:2,color:'DDDDDD',space:1}}
+    });
+
+    const children=[
+      headerTable,
+      Spacer(),
+      new Paragraph({children:[new TextRun({text:titulo,bold:true,size:32,color:DARK,font:'Arial'})],spacing:{before:240,after:80}}),
+      selNar>=0?new Paragraph({children:[new TextRun({text:'Macronarrativa: '+narLabel,size:18,color:TEAL,font:'Arial',bold:true})],spacing:{before:0,after:200}}):new Paragraph({}),
+      metaTable,
+      Spacer(),
+      ...(hook?[H('Ángulo de apertura'),new Paragraph({children:[new TextRun({text:hook,size:21,color:MID,font:'Arial',italics:true})],spacing:{before:80,after:160}})]:[] ),
+      ...Section('Introducción',intro),
+      ...Section('¿Qué lo hace relevante HOY?',rel),
+      ...Section('Impacto y transformación',imp),
+      ...Section('Rol de la cooperación alemana / GIZ',rol),
+      ...elems,
+      ...Section('Cierre',cierre),
+      ...(selIns.length?[H('Insumos disponibles'),Body(selIns.join(' · '))]:[] ),
+      Spacer(),
+      new Paragraph({children:[new TextRun({text:'MATRIZ NARRATIVA',bold:true,size:20,color:DARK,font:'Arial'})],spacing:{before:240,after:100}}),
+      matTable,
+      footer
+    ];
+
+    const doc=new Document({
+      styles:{default:{document:{run:{font:'Arial',size:21,color:DARK}}}},
+      sections:[{
+        properties:{page:{size:{width:11906,height:16838},margin:{top:1134,right:1134,bottom:1134,left:1134}}},
+        children
+      }]
+    });
+
+    const buffer=await Packer.toBlob(doc);
+    const url=URL.createObjectURL(buffer);
+    const a=document.createElement('a');
+    a.href=url;
+    const slug=(titulo||'producto').slice(0,30).replace(/[^a-zA-Z0-9áéíóúñÁÉÍÓÚÑ ]/g,'').replace(/ /g,'_');
+    a.download=`ConoSur2025_${slug}.docx`;
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast('Documento Word exportado 📝','word');
+  } catch(err){
+    console.error(err);
+    showToast('Error al generar Word. Revisa la consola.','err');
+  } finally{
+    btn.classList.remove('btn-loading');
+    btn.innerHTML='📝 Exportar Word (.docx)';
+  }
+}
+
+/* ═══════════════ AUTOSAVE ═══════════════ */
+function autosave(){
+  clearTimeout(autosaveTimer);
+  document.getElementById('autosaveStatus').className='autosave-indicator';
+  document.getElementById('autosaveStatus').innerHTML='<div class="autosave-dot"></div> Guardando...';
+  autosaveTimer=setTimeout(()=>{
+    const state={
+      checks:[...checks],selNar,
+      titulo:v('f_titulo'),intro:v('f_intro'),rel:v('f_relevancia'),
+      imp:v('f_impacto'),rol:v('f_rol'),cierre:v('f_cierre'),
+      proyecto:v('inp_proyecto'),pais:v('inp_pais'),gm:v('inp_grupometa'),
+      dato:v('inp_dato'),hook:v('inp_hook'),
+      dark:isDark,
+      elemSel:Array.from(document.querySelectorAll('#elemChips .chip.sel')).map((_,i)=>i),
+      insSel:Array.from(document.querySelectorAll('#insumosChips .chip.sel')).map((_,i)=>i),
+    };
+    localStorage.setItem('conosur_kit_2025',JSON.stringify(state));
+    document.getElementById('autosaveStatus').className='autosave-indicator saved';
+    document.getElementById('autosaveStatus').innerHTML='<div class="autosave-dot"></div> Guardado automáticamente';
+  },800);
+}
+
+function loadSaved(){
+  try{
+    const s=JSON.parse(localStorage.getItem('conosur_kit_2025'));
+    if(!s) return;
+    s.checks.forEach((v,i)=>{if(v){checks[i]=true;document.getElementById('ci'+i).classList.add('checked');}});
+    if(s.selNar>=0) selectNar(s.selNar);
+    const set=(id,val)=>{const el=document.getElementById(id);if(el&&val)el.value=val;};
+    set('f_titulo',s.titulo);set('f_intro',s.intro);set('f_relevancia',s.rel);
+    set('f_impacto',s.imp);set('f_rol',s.rol);set('f_cierre',s.cierre);
+    set('inp_proyecto',s.proyecto);set('inp_pais',s.pais);set('inp_grupometa',s.gm);
+    set('inp_dato',s.dato);set('inp_hook',s.hook);
+    if(s.dark) toggleDark();
+    if(s.elemSel){const chips=document.querySelectorAll('#elemChips .chip');s.elemSel.forEach(i=>{if(chips[i])chips[i].classList.add('sel');});}
+    if(s.insSel){const chips=document.querySelectorAll('#insumosChips .chip');s.insSel.forEach(i=>{if(chips[i])chips[i].classList.add('sel');});}
+    updateScore();updateCount();
+    if(s.titulo||s.intro) showToast('Datos recuperados del guardado automático','ok');
+  }catch(e){}
+}
+
+/* ═══════════════ DARK MODE ═══════════════ */
+function toggleDark(){
+  isDark=!isDark;
+  document.documentElement.setAttribute('data-theme',isDark?'dark':'');
+  document.getElementById('darkIcon').textContent=isDark?'☀️':'🌙';
+  document.getElementById('darkLabel').textContent=isDark?'Modo claro':'Modo oscuro';
+  autosave();
+}
+
+/* ═══════════════ RESET ═══════════════ */
+function resetAll(){
+  if(!confirm('¿Reiniciar todo? Se perderá el contenido actual.')) return;
+  checks.fill(false);selNar=-1;
+  document.querySelectorAll('.ci').forEach(el=>el.classList.remove('checked'));
+  document.querySelectorAll('.nc').forEach(el=>el.classList.remove('sel'));
+  document.querySelectorAll('.chip').forEach(el=>el.classList.remove('sel'));
+  ['f_titulo','f_intro','f_relevancia','f_impacto','f_rol','f_cierre','inp_proyecto','inp_pais','inp_grupometa','inp_dato','inp_hook']
+    .forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  localStorage.removeItem('conosur_kit_2025');
+  updateScore();updateCount();goStep(1);
+  showToast('Herramienta reiniciada');
+}
+
+/* ═══════════════ TOAST ═══════════════ */
+function showToast(msg,type=''){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.className='toast show'+(type?' '+type:'');
+  clearTimeout(t._timer);
+  t._timer=setTimeout(()=>t.classList.remove('show'),3000);
+}
+
+/* ═══════════════ INIT ═══════════════ */
+window.addEventListener('DOMContentLoaded',()=>{
+  loadSaved();
+  // Keyboard shortcut: Ctrl+Enter to advance step
+  document.addEventListener('keydown',e=>{
+    if((e.ctrlKey||e.metaKey)&&e.key==='Enter'){
+      const active=[1,2,3,4].find(i=>document.getElementById('p'+i).classList.contains('active'));
+      if(active<4){if(active===3)buildOutput();goStep(active+1);}
+    }
+  });
+});
+</script>
+</body>
+</html>
